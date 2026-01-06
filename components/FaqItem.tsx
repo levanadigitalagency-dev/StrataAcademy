@@ -22,7 +22,7 @@ export default function FaqItem({ item, isOpen, onToggle }: FAQItemProps) {
           <div className={`p-2 rounded-lg transition-colors ${isOpen ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
             <HelpCircle size={20} />
           </div>
-          <span className={`font-semibold text-lg ${isOpen ? 'text-primary' : 'text-slate-800'}`}>
+          <span className={`font-semibold text-base lg:text-lg ${isOpen ? 'text-primary' : 'text-slate-800'}`}>
             {item.question}
           </span>
         </div>

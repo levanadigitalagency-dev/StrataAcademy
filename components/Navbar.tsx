@@ -1,18 +1,18 @@
 'use client'
 
-import { motion, useScroll, AnimatePresence } from 'motion/react'
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'motion/react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import Image from 'next/image'
 import logo from "@/public/logo.png"
-import Button from './Button'
+import CustomLink from './CustomLink'
 
 const navLinks = [
   { name: 'Beranda', href: '#home' },
-  { name: 'Cohort Class', href: '#cohort' },
-  { name: 'Kelas Privat', href: '#privat' },
   { name: 'Tentang Kami', href: '#about' },
+  { name: 'Cohort Class', href: '#cohort' },
+  { name: 'Kelas Privat', href: '#private' },
   { name: 'Testimoni', href: '#testimoni' },
   { name: 'FAQ', href: '#faq' },
 ]
@@ -20,130 +20,156 @@ const navLinks = [
 export default function Navbar() {
   const { scrollY } = useScroll()
 
-  const [isPill, setIsPill] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    const updateNavbar = (currentY: number) => {
-      const isMobile = window.innerWidth < 768;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
-      if (isMobile) {
-        setIsPill(true);
-      } else {
-        const shouldBePill = currentY > 0;
-        setIsPill((prev) => (prev !== shouldBePill ? shouldBePill : prev));
-      }
-    };
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (!isMobile) {
+      setIsScrolled(latest > 0)
+    }
+  })
 
-    const unsubscribe = scrollY.on('change', updateNavbar);
-
-    requestAnimationFrame(() => {
-      updateNavbar(window.scrollY);
-    });
-
-    return () => unsubscribe();
-  }, [scrollY]);
-
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const isPill = isMobile || isScrolled
 
   return (
     <motion.nav
       layout
       animate={{
-        width: isPill ? '92%' : '100%',
-        borderRadius: isPill ? '52px' : '0px',
+        borderRadius: isPill ? '50px' : '0px',
         top: isPill ? '1rem' : '0rem',
         height: isOpen ? 'auto' : '4rem',
+        backgroundColor: (isPill || isOpen) ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0)",
+        borderColor: (isPill || isOpen) ? "rgb(255, 255, 255)" : "rgba(255, 255, 255, 0)",
+        boxShadow: (isPill || isOpen) ? "0px 2px 2px rgba(0,0,0,0.2) " : "0px 0px 0px rgba(0,0,0,0)"
       }}
+      initial={{ width: '100%', top: '0rem' }}
       transition={{
         type: 'tween',
-        duration: 0.3,
-        ease: 'easeInOut'
+        stiffness: 260,
+        damping: 20,
       }}
-      className="
-        fixed left-1/2 -translate-x-1/2 z-50 overflow-hidden
-        bg-white/80 backdrop-blur-xl
-        border border-white/20 shadow-xl
-        md:bg-white/60
-      "
+      className={`
+        fixed left-1/2 z-50 overflow-hidden
+        backdrop-blur-lg border border-transparent
+        ${isPill ? 'shadow-sm' : ''}
+      `}
+      style={{
+        maxWidth: '90.6%',
+        x: "-50%",
+      }}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <motion.div
+        layout
+        animate={{
+          padding: isPill ? '35px' : '0px',
+        }}
+        className="flex h-16 items-center justify-between w-full">
+
         {/* Logo */}
-        <Link href="/" className="font-bold text-lg shrink-0">
+        <Link href="#home" className="shrink-0 relative w-25 h-12.5">
           <Image
             src={logo}
-            width={120}
-            height={80}
             alt='Logo'
-            className="object-contain h-auto w-auto"
+            fill
+            sizes="100px"
+            className="object-contain"
+            priority
           />
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex gap-6 text-sm font-medium text-gray-700">
+        {/* Desktop Menu */}
+        <div className="hidden md:flex gap-8 text-sm font-medium text-gray-700">
           {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className="hover:text-black transition-colors">{link.name}</Link>
+            <Link
+              key={link.name}
+              href={link.href}
+              className="hover:text-teal-600 transition-colors"
+            >
+              {link.name}
+            </Link>
           ))}
         </div>
 
-        {/* Desktop button */}
+        {/* Desktop Buttons */}
         <div className="hidden md:flex gap-3">
-          <Button
-            onClick={() => setIsOpen(false)}
-          >
-            Daftar
-          </Button>
-          <Button variant='secondary'
-            onClick={() => setIsOpen(false)}
-          >
-            Masuk
-          </Button>        </div>
+          <CustomLink
+            className='px-10'
+            href='https://strataacademy.id/register'
+            variant='primary'
+            size='md'>Daftar
+          </CustomLink>
 
-        {/* Mobile hamburger */}
+          <CustomLink
+            className='px-10'
+            href='https://strataacademy.id/login'
+            variant='secondary'
+            size='md'>Masuk
+          </CustomLink>
+
+        </div>
+
+        {/* Mobile Hamburger */}
         <button
-          onClick={toggleMenu}
-          className="md:hidden p-1 rounded-full hover:bg-gray-100 transition-colors"
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
+          aria-label="Toggle Menu"
         >
-          {isOpen ? <X size={24} className="text-gray-700" /> : <Menu size={24} className="text-gray-700" />}
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
-      </div>
+      </motion.div>
 
       {/* --- MOBILE MENU CONTENT --- */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, delay: 0.1 }} // Sedikit delay agar container membesar dulu baru konten muncul
-            className="md:hidden flex flex-col px-6 pb-8 pt-2"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden flex flex-col px-6 pb-6 pt-2"
           >
-            {/* Links List */}
-            <div className="flex flex-col gap-4 text-lg font-medium text-gray-800">
+            <div className="flex flex-col gap-4 text-base font-medium text-gray-800 border-t pt-4">
               {navLinks.map((link, idx) => (
                 <Link
                   key={idx}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className={idx === 0 ? "text-[#14b8a6]" : "hover:text-[#14b8a6]"}
+                  className="hover:text-teal-600 hover:pl-2 transition-all duration-200"
                 >
                   {link.name}
                 </Link>
               ))}
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-8 flex gap-4 w-full">
-              <Button
-                onClick={() => setIsOpen(false)}
-              >
-                Daftar
-              </Button>
-              <Button variant='secondary'
-                onClick={() => setIsOpen(false)}
-              >
-                Masuk
-              </Button>
+            <div className="mt-6 flex gap-3 w-full">
+              <div className="w-full">
+                <CustomLink
+                  className='w-full justify-center'
+                  href='https://strataacademy.id/register'
+                  variant='primary'
+                  size='md'>Daftar
+                </CustomLink>
+
+              </div>
+              <div className="w-full">
+                <CustomLink
+                  className='w-full justify-center'
+                  href='https://strataacademy.id/login'
+                  variant='secondary'
+                  size='md'>Masuk
+                </CustomLink>
+
+              </div>
             </div>
           </motion.div>
         )}

@@ -15,7 +15,7 @@ export default function Button({
 
   const variants = {
     primary: 'bg-primary text-white hover:bg-[#128E8C]',
-    secondary: 'transparent border border-primary text-primary',
+    secondary: 'transparent border border-primary text-primary hover:bg-cyan-100 hover:text-[#11B1AE]',
     danger: 'bg-red-600 text-white hover:bg-red-700'
   };
 
@@ -26,7 +26,6 @@ export default function Button({
   };
 
   const baseStyles = 'inline-flex items-center justify-center font-medium transition-colors rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
-
 
   return (
     <button className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`} disabled={isLoading || props.disabled} {...props}>

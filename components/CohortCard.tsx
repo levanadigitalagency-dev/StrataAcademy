@@ -1,14 +1,12 @@
 import { CheckCircle2 } from "lucide-react";
 import Button from "./Button";
 
-// Definisikan tipe data untuk konten card
 export type CohortCardProps = {
   title: string;
   description: string;
   price: number;
   features: string[];
-  isPopular?: boolean; // Flag opsional untuk varian populer
-  buttonText?: string;
+  isPopular?: boolean;
 };
 
 export default function CohortCard({
@@ -17,19 +15,16 @@ export default function CohortCard({
   price,
   features,
   isPopular = false,
-  buttonText = "Pilih Paket",
 }: CohortCardProps) {
 
-  // Format harga ke Rupiah
   const formattedPrice = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
   }).format(price);
 
-  // Wrapper utama untuk varian populer (aksen warna teal)
   const PopularWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex flex-col items-center justify-center bg-primary rounded-3xl p-1.25 pt-3.5 w-full h-full">
+    <div className="flex flex-col items-center justify-center bg-primary rounded-3xl p-1.5 pt-3.5 h-full w-full md:w-87.5">
       <h3 className="pb-2.5 font-bold text-[#f5f5f5] text-sm uppercase tracking-wider">
         Populer
       </h3>
@@ -39,11 +34,14 @@ export default function CohortCard({
     </div>
   );
 
-  // Base Card Content
-  const CardContent = () => (
-    // PENTING: Tetapkan lebar pasti (misal w-[350px]) agar slider konsisten.
-    // Hapus max-w-100 lama, gunakan lebar fixed. flex-1 h-full memastikan tinggi sama.
-    <div className="w-full  md:w-[350px] md:max-w-none border-2 border-gray-100 rounded-3xl p-7.5 flex flex-col h-full flex-1 bg-white">
+  const CardContent = ({ isWrapped = false }: { isWrapped?: boolean }) => (
+    <div
+      className={`
+        border-2 border-gray-100 rounded-3xl p-7.5 flex flex-col h-full flex-1 bg-white
+        w-full hover:border-primary transition-colors group
+        ${!isWrapped ? 'md:w-87.5' : ''} 
+      `}
+    >
       {/* Header Section */}
       <div className="grow">
         <div className="mb-5">
@@ -55,18 +53,18 @@ export default function CohortCard({
 
         {/* Price Section */}
         <div className="mb-6">
-          <span className="text-2xl font-bold text-[#1ca394]">
+          <span className="text-2xl font-bold text-primary">
             {formattedPrice}
           </span>
         </div>
 
         {/* Button */}
         <Button variant={isPopular ? "primary" : "secondary"} className="w-full">
-          {buttonText}
+          Pilih paket
         </Button>
 
         {/* Divider */}
-        <div className="h-px bg-gray-100 w-full my-7.5"></div>
+        <div className="h-px bg-gray-100 w-full my-7.5 group-hover:bg-primary transition-colors"></div>
 
         {/* Features List */}
         <div className="space-y-4 mb-2">
@@ -83,11 +81,10 @@ export default function CohortCard({
     </div>
   );
 
-  // Render berdasarkan status popular
   if (isPopular) {
     return (
       <PopularWrapper>
-        <CardContent />
+        <CardContent isWrapped={true} />
       </PopularWrapper>
     );
   }
