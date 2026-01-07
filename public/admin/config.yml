@@ -1,11 +1,13 @@
+local_backend: true
+
+editor:
+ preview: false
+
 backend:
   name: git-gateway
-  repo: hazubeep/strata-academy-local
+  repo: strataacademybylevana/strata-academy-staging
   branch: main
-  auth_type: pkce
-  base_url: https://auth.decapbridge.com
-  auth_endpoint: /sites/29205f66-9d1b-4db4-8126-7292fa2c0bdd/pkce
-  auth_token_endpoint: /sites/29205f66-9d1b-4db4-8126-7292fa2c0bdd/token
+  identity_url: https://auth.decapbridge.com/sites/d25aa2d9-287d-4ad5-9527-0eae898d7586
   gateway_url: https://gateway.decapbridge.com
 
   # See who did what (optional)
@@ -17,117 +19,97 @@ backend:
     deleteMedia: Delete “{{path}}” - {{author-name}} <{{author-login}}> via DecapBridge
     openAuthoring: Message {{message}} - {{author-name}} <{{author-login}}> via DecapBridge
 
-build_hook: https://api.vercel.com/v1/integrations/deploy/prj_kmxoViAhksBwLQsC0OlzP4TDJFOi/ljMOXdgjxn
-
-# Enable PKCE fields (optional, recommended)
-auth:
-  email_claim: email
-  first_name_claim: first_name
-  last_name_claim: last_name
-  avatar_url_claim: avatar_url
-
 # Better Decap + Bridge logo (optional)
 logo_url: https://decapbridge.com/decapcms-with-bridge.svg
 
 # Add site links in Decap CMS (optional)
-site_url: https://strata-academy-local.vercel.app
+site_url: https://strata-academy-staging.vercel.app
+
+# Add site links in Decap CMS (optional)
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
 collections:
-  - name: "pages"
-    label: "Halaman"
+  - name: "homepage_sections"
+    label: "Edit Halaman Home"
     files:
-      - name: "home"
-        label: "Landing Page"
-        file: "content/home.md"
+      # --- FILE 1: HERO ---
+      - name: "hero"  # <--- Nama entry ini 'hero'
+        label: "1. Hero Section"
+        file: "content/hero.md"
         fields:
-          # --- SECTION 1: HERO ---
-          - label: "Hero Section"
-            name: "hero"
-            widget: "object" 
-            fields:
-              - { label: "Headline", name: "title", widget: "text" }
-              - { label: "Subheadline", name: "subtitle", widget: "text" }
+          - { label: "Headline", name: "title", widget: "text" }
+          - { label: "Subheadline", name: "subtitle", widget: "text" }
 
-          # --- SECTION 2: ABOUT ---
-          - label: "About Section"
-            name: "about"
-            widget: "object"
-            fields:
-              - { label: "Paragraf 1", name: "paragraf_1", widget: "text" }
-              - { label: "Paragraf 2", name: "paragraf_2", widget: "text" }
+      # --- FILE 2: ABOUT (Keluarkan dari 'fields' hero, buat sejajar) ---
+      - name: "about"
+        label: "2. About Section"
+        file: "content/about.md" # Simpan di file terpisah
+        fields:
+          - { label: "Paragraf 1", name: "paragraf_1", widget: "text" }
+          - { label: "Paragraf 2", name: "paragraf_2", widget: "text" }
 
-          # --- SECTION 3: COHORT ---
-          - label: "Cohort Section"
-            name: "cohort"
-            widget: "object"
+      # --- FILE 3: COHORT ---
+      - name: "cohort"
+        label: "3. Cohort Section"
+        file: "content/cohort.md"
+        fields:
+          - label: "Daftar Paket"
+            name: "packages"
+            widget: "list"
+            summary: "{{title}} - Rp {{price}}"
             fields:
-              - label: "Daftar Paket"
-                name: "packages"
+              - { label: "Judul Paket", name: "title", widget: "string" }
+              - { label: "Deskripsi", name: "description", widget: "text" }
+              - { label: "Harga", name: "price", widget: "number" }
+              - label: "Fitur"
+                name: "features"
                 widget: "list"
-                summary: "{{title}} - Rp {{price}}"  # <-- SUMMARY DITAMBAHKAN
-                fields:
-                  - { label: "Judul Paket", name: "title", widget: "string" }
-                  - { label: "Deskripsi Paket", name: "description", widget: "text" }
-                  - { label: "Harga (angka)", name: "price", widget: "number" }
-                  # Fix Spasi (Features):
-                  # --- Bagian Fitur di Packages ---
-                  - label: "Fitur"
-                    name: "features"
-                    widget: "list"
-                    summary: "{{fields.item}}"  # <--- TAMBAHKAN INI
-                    field: { label: "Deskripsi Fitur", name: "item", widget: "string" }
-                  - {
-                      label: "Populer?",
-                      name: "isPopular",
-                      widget: "boolean",
-                      default: false,
-                    }
+                summary: "{{fields.item}}"
+                field: { label: "Item", name: "item", widget: "string" }
+              - { label: "Populer?", name: "isPopular", widget: "boolean", default: false }
 
-
-          # --- SECTION 4: PRIVATE ---
-          - label: "Private Class Section"
-            name: "private_section"
-            widget: "object"
+      # --- FILE 4: PRIVATE ---
+      - name: "private_section"
+        label: "4. Private Class"
+        file: "content/private.md"
+        fields:
+          - label: "Daftar Paket"
+            name: "packages"
+            widget: "list"
+            summary: "{{title}}"
             fields:
-              - label: "Daftar Paket"
-                name: "packages"
+              - { label: "Judul", name: "title", widget: "string" }
+              - { label: "Deskripsi", name: "description", widget: "text" }
+              - label: "Fitur"
+                name: "features"
                 widget: "list"
-                summary: "{{title}}"  # <-- SUMMARY DITAMBAHKAN
-                fields:
-                  - { label: "Judul Paket", name: "title", widget: "string" }
-                  - { label: "Deskripsi Paket", name: "description", widget: "text" }
-                  # Fix Spasi (Features):
-                  - label: "Fitur"
-                    name: "features"
-                    widget: "list"
-                    field: { label: "Deskripsi Fitur", name: "item", widget: "string" }
-                          
+                summary: "{{fields.item}}"
+                field: { label: "Item", name: "item", widget: "string" }
 
-          # --- SECTION 5: TESTIMONIAL ---
-          - label: "Testimonial Section"
-            name: "testimonial"
-            widget: "object"
+      # --- FILE 5: TESTIMONIAL ---
+      - name: "testimonial"
+        label: "5. Testimonial"
+        file: "content/testimonial.md"
+        fields:
+          - label: "Daftar Testimoni"
+            name: "items"
+            widget: "list"
+            summary: "{{name}} - {{role}}"
             fields:
-              - label: "Daftar Testimoni"
-                name: "items"
-                widget: "list"
-                summary: "{{name}} - {{role}}"  # <-- MUNCULKAN NAMA & ROLE
-                fields:
-                  - { label: "Konten", name: "content", widget: "text" }
-                  - { label: "Nama", name: "name", widget: "string" }
-                  - { label: "Role", name: "role", widget: "string" }
+              - { label: "Konten", name: "content", widget: "text" }
+              - { label: "Nama", name: "name", widget: "string" }
+              - { label: "Role", name: "role", widget: "string" }
 
-          # --- SECTION 6: FAQ ---
-          - label: "FAQ Section"
-            name: "faq_section" 
-            widget: "object"
+      # --- FILE 6: FAQ ---
+      - name: "faq_section"
+        label: "6. FAQ"
+        file: "content/faq.md"
+        fields:
+          - label: "Daftar Pertanyaan"
+            name: "faqs"
+            widget: "list"
+            summary: "{{question}}"
             fields:
-              - label: "Daftar Pertanyaan"
-                name: "faqs"
-                widget: "list" 
-                summary: "{{question}}"  # <-- MUNCULKAN PERTANYAAN
-                fields:
-                  - { label: "Pertanyaan", name: "question", widget: "string" }
-                  - { label: "Jawaban", name: "answer", widget: "text" }
+              - { label: "Pertanyaan", name: "question", widget: "string" }
+              - { label: "Jawaban", name: "answer", widget: "markdown" }
